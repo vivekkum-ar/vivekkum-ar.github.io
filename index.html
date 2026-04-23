@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -16,4 +16,1368 @@
 <script>
     window.location.href = 'https://kumar-vivek.web.app';
 </script>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vivek Kumar — Digital Realities</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --neon-blue: #00d4ff;
+    --neon-purple: #7b2fff;
+    --neon-cyan: #00ffcc;
+    --dark-bg: #03010a;
+    --glass-bg: rgba(255,255,255,0.04);
+    --glass-border: rgba(0,212,255,0.18);
+    --text-primary: #e8f4fd;
+    --text-dim: #7a9bb5;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--dark-bg);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #0a0015; }
+  ::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 2px; }
+
+  /* Canvas */
+  #canvas-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Scanlines */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,212,255,0.015) 2px,
+      rgba(0,212,255,0.015) 4px
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Main content */
+  #app {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.2rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(3,1,10,0.6);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0,212,255,0.1);
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.15em;
+    color: var(--neon-blue);
+    text-shadow: 0 0 20px rgba(0,212,255,0.6);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.3s, text-shadow 0.3s;
+  }
+
+  .nav-links a:hover {
+    color: var(--neon-blue);
+    text-shadow: 0 0 12px rgba(0,212,255,0.7);
+  }
+
+  /* SECTIONS */
+  section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 2rem 4rem;
+  }
+
+  /* HERO */
+  #hero {
+    position: relative;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.35em;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeInUp 0.8s 0.3s ease forwards;
+  }
+
+  .hero-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 14vw, 11rem);
+    line-height: 0.88;
+    letter-spacing: 0.04em;
+    color: transparent;
+    background: linear-gradient(135deg, #fff 0%, var(--neon-blue) 50%, var(--neon-purple) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    text-shadow: none;
+    filter: drop-shadow(0 0 60px rgba(0,212,255,0.3));
+    opacity: 0;
+    animation: fadeInUp 0.9s 0.5s ease forwards;
+  }
+
+  .hero-subtitle {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.2rem, 4vw, 2.8rem);
+    letter-spacing: 0.35em;
+    color: var(--neon-blue);
+    text-shadow: 0 0 30px rgba(0,212,255,0.5);
+    margin-top: 0.5rem;
+    opacity: 0;
+    animation: fadeInUp 0.9s 0.7s ease forwards;
+  }
+
+  .hero-desc {
+    max-width: 560px;
+    margin: 2rem auto 0;
+    font-size: 1.05rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+    letter-spacing: 0.03em;
+    opacity: 0;
+    animation: fadeInUp 0.9s 0.9s ease forwards;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeInUp 0.9s 1.1s ease forwards;
+  }
+
+  .btn-primary {
+    padding: 0.75rem 2rem;
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+    border: none;
+    border-radius: 2px;
+    color: #fff;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: box-shadow 0.3s, transform 0.2s;
+    box-shadow: 0 0 20px rgba(0,212,255,0.3);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 0 40px rgba(0,212,255,0.6);
+    transform: translateY(-2px);
+  }
+
+  .btn-outline {
+    padding: 0.75rem 2rem;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    border-radius: 2px;
+    color: var(--neon-blue);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: background 0.3s, border-color 0.3s, transform 0.2s;
+  }
+
+  .btn-outline:hover {
+    background: rgba(0,212,255,0.08);
+    border-color: var(--neon-blue);
+    transform: translateY(-2px);
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeInUp 1s 1.5s ease forwards;
+  }
+
+  .scroll-hint span {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--neon-blue), transparent);
+    animation: scrollPulse 2s ease infinite;
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(1.2); }
+  }
+
+  /* GLASS CARD */
+  .glass-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 4px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 2rem;
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+    opacity: 0.6;
+  }
+
+  .glass-card:hover {
+    border-color: rgba(0,212,255,0.4);
+    box-shadow: 0 8px 40px rgba(0,212,255,0.12), 0 0 0 1px rgba(0,212,255,0.05);
+    transform: translateY(-4px);
+  }
+
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.4em;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    letter-spacing: 0.05em;
+    line-height: 1;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+
+  .section-title span {
+    color: var(--neon-blue);
+  }
+
+  /* ABOUT */
+  #about .container {
+    max-width: 1100px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .about-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .about-stat .num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    color: var(--neon-blue);
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(0,212,255,0.5);
+  }
+
+  .about-stat .label {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* SKILLS */
+  #skills .container {
+    max-width: 1100px;
+    width: 100%;
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .skill-category {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.25em;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .skill-tag {
+    padding: 0.28rem 0.75rem;
+    background: rgba(0,212,255,0.07);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 2px;
+    font-size: 0.78rem;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .skill-tag:hover {
+    background: rgba(0,212,255,0.15);
+    border-color: var(--neon-blue);
+  }
+
+  /* EXPERIENCE */
+  #experience .container {
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .exp-timeline {
+    position: relative;
+    margin-top: 3rem;
+    padding-left: 2rem;
+  }
+
+  .exp-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--neon-blue), var(--neon-purple), transparent);
+  }
+
+  .exp-item {
+    position: relative;
+    margin-bottom: 2rem;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+
+  .exp-item.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .exp-item::before {
+    content: '';
+    position: absolute;
+    left: -2.45rem;
+    top: 0.6rem;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--neon-blue);
+    box-shadow: 0 0 12px rgba(0,212,255,0.8);
+  }
+
+  .exp-role {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.06em;
+    color: var(--text-primary);
+  }
+
+  .exp-company {
+    font-size: 0.9rem;
+    color: var(--neon-blue);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.3rem;
+  }
+
+  .exp-period {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+
+  .exp-desc {
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  /* PROJECTS */
+  #projects .container {
+    max-width: 1100px;
+    width: 100%;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .project-card {
+    position: relative;
+  }
+
+  .project-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+    color: rgba(0,212,255,0.08);
+    line-height: 1;
+    position: absolute;
+    top: 1rem; right: 1.5rem;
+  }
+
+  .project-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.35rem;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
+    color: var(--text-primary);
+  }
+
+  .project-desc {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .project-link {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    color: var(--neon-cyan);
+    text-decoration: none;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(0,255,204,0.3);
+    padding-bottom: 2px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .project-link:hover {
+    color: var(--neon-blue);
+    border-color: var(--neon-blue);
+  }
+
+  /* EDUCATION & CERTS */
+  #education .container {
+    max-width: 1100px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+  }
+
+  .edu-item {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0,212,255,0.08);
+  }
+
+  .edu-item:last-child { border-bottom: none; }
+
+  .edu-degree {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .edu-school {
+    font-size: 0.85rem;
+    color: var(--neon-blue);
+    margin-bottom: 0.2rem;
+  }
+
+  .edu-meta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .cert-badge {
+    display: inline-block;
+    padding: 0.35rem 0.9rem;
+    background: rgba(123,47,255,0.12);
+    border: 1px solid rgba(123,47,255,0.3);
+    border-radius: 2px;
+    font-size: 0.78rem;
+    color: #c4a0ff;
+    margin: 0.3rem;
+    transition: background 0.2s;
+  }
+
+  .cert-badge:hover {
+    background: rgba(123,47,255,0.25);
+  }
+
+  /* CONTACT */
+  #contact {
+    text-align: center;
+    flex-direction: column;
+  }
+
+  .contact-links {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2.5rem;
+  }
+
+  .contact-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .contact-icon {
+    width: 48px; height: 48px;
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .contact-icon:hover {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 20px rgba(0,212,255,0.3);
+  }
+
+  .contact-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid rgba(0,212,255,0.08);
+    padding: 2rem;
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* CURSOR */
+  .cursor {
+    position: fixed;
+    width: 10px; height: 10px;
+    background: var(--neon-blue);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s;
+    box-shadow: 0 0 10px rgba(0,212,255,0.8);
+  }
+
+  .cursor-trail {
+    position: fixed;
+    width: 30px; height: 30px;
+    border: 1px solid rgba(0,212,255,0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: left 0.15s ease, top 0.15s ease;
+  }
+
+  /* AWARDS */
+  .award-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(0,212,255,0.08);
+  }
+
+  .award-dot {
+    width: 6px; height: 6px;
+    background: var(--neon-cyan);
+    border-radius: 50%;
+    margin-top: 0.45rem;
+    flex-shrink: 0;
+    box-shadow: 0 0 8px rgba(0,255,204,0.8);
+  }
+
+  /* MOBILE NAV */
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+
+    #about .container,
+    #education .container { grid-template-columns: 1fr; gap: 2rem; }
+
+    .hero-name { font-size: clamp(3rem, 18vw, 5rem); }
+
+    section { padding: 5rem 1.2rem 3rem; }
+
+    .glass-card { padding: 1.4rem; }
+  }
+
+  /* Horizontal glitch animation */
+  @keyframes glitch {
+    0%, 92%, 100% { clip-path: none; transform: none; }
+    94% { clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%); transform: translateX(-4px); }
+    96% { clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%); transform: translateX(4px); }
+    98% { clip-path: polygon(0 0, 100% 0, 100% 20%, 0 20%); transform: translateX(-2px); }
+  }
+
+  .glitch-text {
+    animation: glitch 8s infinite;
+  }
+
+  /* Neon glow pulse */
+  @keyframes neonPulse {
+    0%, 100% { text-shadow: 0 0 20px rgba(0,212,255,0.5); }
+    50% { text-shadow: 0 0 40px rgba(0,212,255,0.9), 0 0 60px rgba(0,212,255,0.4); }
+  }
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-trail" id="cursorTrail"></div>
+
+<!-- THREE.JS CANVAS -->
+<div id="canvas-container">
+  <canvas id="three-canvas"></canvas>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">VK.DEV</div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div>
+      <p class="hero-eyebrow">// Technical Trainer · AI & ML · Cyber Security</p>
+      <h1 class="hero-name glitch-text">VIVEK<br/>KUMAR</h1>
+      <p class="hero-subtitle">Vivek kumar</p>
+      <p class="hero-desc">
+        Technology professional bridging AI fundamentals, Cyber Security, and Embedded Systems into real-world, job-ready experiences. WorldSkills Certified Mentor & Full-Stack Developer.
+      </p>
+      <div class="hero-cta">
+        <a href="#projects" class="btn-primary">View Projects</a>
+        <a href="mailto:vivekkr9119@gmail.com" class="btn-outline">Get In Touch</a>
+      </div>
+    </div>
+    <div class="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="container">
+      <div class="reveal">
+        <p class="section-label">// 01 — Identity</p>
+        <h2 class="section-title">ABOUT <span>ME</span></h2>
+        <p style="color:var(--text-dim); line-height:1.8; font-size:1rem; margin-bottom:1.5rem;">
+          Dedicated technology professional with a strong foundation in AI fundamentals, Cyber Security, Networking, and Embedded Systems. Skilled in designing learner-friendly technical content and simplifying complex concepts into practical experiences.
+        </p>
+        <p style="color:var(--text-dim); line-height:1.8; font-size:1rem;">
+          Currently pursuing M.Tech in AI & ML while training the next generation of engineers at NTTF — formerly RD Tata Tech Centre, Jamshedpur, Jharkhand.
+        </p>
+        <div style="display:flex; gap:2.5rem; margin-top:2rem; flex-wrap:wrap;">
+          <div class="about-stat">
+            <span class="num">4+</span>
+            <span class="label">Years Experience</span>
+          </div>
+          <div class="about-stat">
+            <span class="num">6+</span>
+            <span class="label">Live Projects</span>
+          </div>
+          <div class="about-stat">
+            <span class="num">8.6</span>
+            <span class="label">B.Tech CGPA</span>
+          </div>
+          <div class="about-stat">
+            <span class="num">73%</span>
+            <span class="label">XAT Percentile</span>
+          </div>
+        </div>
+      </div>
+      <div class="reveal" style="transition-delay:0.2s;">
+        <div class="glass-card" style="border-color:rgba(123,47,255,0.3);">
+          <p class="section-label">// Current Role</p>
+          <h3 style="font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:0.05em; margin-bottom:0.4rem;">Technical Trainer</h3>
+          <p style="color:var(--neon-blue); font-size:0.9rem; margin-bottom:1rem;">NTTF — RD Tata Tech. Centre · Apr 2024 – Present</p>
+          <p style="color:var(--text-dim); font-size:0.9rem; line-height:1.7;">
+            Certified WorldSkills Mentor by Autodesk. Delivering hands-on training in AI/ML fundamentals, Cyber Security, and Networking to diploma-level students.
+          </p>
+          <div style="margin-top:1.2rem; padding:0.8rem; background:rgba(0,212,255,0.05); border-left:2px solid var(--neon-blue);">
+            <p style="font-family:'Share Tech Mono',monospace; font-size:0.72rem; color:var(--neon-cyan); letter-spacing:0.1em;">
+              📍 Jamshedpur, Jharkhand · vivekkr9119@gmail.com
+            </p>
+          </div>
+        </div>
+
+        <div class="glass-card" style="margin-top:1.2rem;">
+          <p class="section-label">// Awards</p>
+          <div class="award-item">
+            <div class="award-dot"></div>
+            <div>
+              <div style="font-size:0.9rem; font-weight:600;">Jharkhand Scholarship</div>
+              <div style="font-size:0.78rem; color:var(--text-dim);">For meritorious students · April 2023</div>
+            </div>
+          </div>
+          <div class="award-item">
+            <div class="award-dot"></div>
+            <div>
+              <div style="font-size:0.9rem; font-weight:600;">Branch Topper</div>
+              <div style="font-size:0.78rem; color:var(--text-dim);">3rd Year B.E · 2023</div>
+            </div>
+          </div>
+          <div class="award-item" style="border:none;">
+            <div class="award-dot"></div>
+            <div>
+              <div style="font-size:0.9rem; font-weight:600;">XLRI XAT Score</div>
+              <div style="font-size:0.78rem; color:var(--text-dim);">64 & 73 Percentile · 2024 & 2025</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="container" style="max-width:1100px; width:100%;">
+      <div class="reveal" style="text-align:center;">
+        <p class="section-label">// 02 — Arsenal</p>
+        <h2 class="section-title">TECH <span>SKILLS</span></h2>
+      </div>
+      <div class="skills-grid">
+
+        <div class="glass-card reveal">
+          <p class="skill-category">AI & Machine Learning</p>
+          <div class="skill-tags">
+            <span class="skill-tag">AI Fundamentals</span>
+            <span class="skill-tag">Generative AI</span>
+            <span class="skill-tag">Machine Learning</span>
+            <span class="skill-tag">ETL</span>
+            <span class="skill-tag">Industry 4.0</span>
+            <span class="skill-tag">IIoT</span>
+          </div>
+        </div>
+
+        <div class="glass-card reveal" style="transition-delay:0.1s;">
+          <p class="skill-category">Cyber Security</p>
+          <div class="skill-tags">
+            <span class="skill-tag">Network Security</span>
+            <span class="skill-tag">Ethical Hacking</span>
+            <span class="skill-tag">SIEM</span>
+            <span class="skill-tag">IDS/IPS</span>
+            <span class="skill-tag">Wireshark</span>
+            <span class="skill-tag">OSI Model</span>
+          </div>
+        </div>
+
+        <div class="glass-card reveal" style="transition-delay:0.2s;">
+          <p class="skill-category">Web Development</p>
+          <div class="skill-tags">
+            <span class="skill-tag">ReactJS</span>
+            <span class="skill-tag">NodeJS</span>
+            <span class="skill-tag">JavaScript ES6</span>
+            <span class="skill-tag">MongoDB</span>
+            <span class="skill-tag">Firebase</span>
+            <span class="skill-tag">AWS</span>
+          </div>
+        </div>
+
+        <div class="glass-card reveal" style="transition-delay:0.3s;">
+          <p class="skill-category">Embedded & Hardware</p>
+          <div class="skill-tags">
+            <span class="skill-tag">Embedded Systems</span>
+            <span class="skill-tag">Digital Electronics</span>
+            <span class="skill-tag">Altium PCB</span>
+            <span class="skill-tag">FANUC Roboguide</span>
+            <span class="skill-tag">Autodesk Fusion 360</span>
+          </div>
+        </div>
+
+        <div class="glass-card reveal" style="transition-delay:0.4s;">
+          <p class="skill-category">Tools & Platforms</p>
+          <div class="skill-tags">
+            <span class="skill-tag">Articulate 360</span>
+            <span class="skill-tag">Tableau</span>
+            <span class="skill-tag">SAP MM</span>
+            <span class="skill-tag">Advanced Excel</span>
+            <span class="skill-tag">Linux</span>
+          </div>
+        </div>
+
+        <div class="glass-card reveal" style="transition-delay:0.5s;">
+          <p class="skill-category">Soft Skills</p>
+          <div class="skill-tags">
+            <span class="skill-tag">Curriculum Design</span>
+            <span class="skill-tag">Technical Training</span>
+            <span class="skill-tag">Content Development</span>
+            <span class="skill-tag">Mentoring</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="container" style="max-width:900px; width:100%;">
+      <div class="reveal">
+        <p class="section-label">// 03 — Journey</p>
+        <h2 class="section-title">WORK <span>EXPERIENCE</span></h2>
+      </div>
+
+      <div class="exp-timeline">
+
+        <div class="exp-item glass-card" style="margin-bottom:1.5rem;">
+          <div class="exp-role">Technical Trainer / Teacher</div>
+          <div class="exp-company">NTTF — formerly RD Tata Tech. Centre</div>
+          <div class="exp-period">Apr 2024 – Present</div>
+          <div class="exp-desc">Certified WorldSkills Mentor by Autodesk. Delivered hands-on AI/ML, Cyber Security, and Networking training. Designed practical labs, mini-projects, and session materials for diploma-level students.</div>
+        </div>
+
+        <div class="exp-item glass-card" style="margin-bottom:1.5rem;">
+          <div class="exp-role">IT Procurement Intern</div>
+          <div class="exp-company">Tata Steel Foundation</div>
+          <div class="exp-period">Aug 2023 – March 2024</div>
+          <div class="exp-desc">Streamlined Release Orders (RO) creation by 25,000 units. Managed Supplier Quotations (CSQ) post RFQ and negotiation, and handled Delivery Orders for IT equipment across departments.</div>
+        </div>
+
+        <div class="exp-item glass-card" style="margin-bottom:1.5rem;">
+          <div class="exp-role">Data Analytics Intern</div>
+          <div class="exp-company">Justdial Ltd.</div>
+          <div class="exp-period">Feb 2023 – July 2023</div>
+          <div class="exp-desc">Enhanced website visibility for paid contracts through SEO optimization. Conducted regression, load, and functional testing; led contract categorization initiatives.</div>
+        </div>
+
+        <div class="exp-item glass-card">
+          <div class="exp-role">Systems Engineering (JET)</div>
+          <div class="exp-company">ZF India Pvt. Ltd.</div>
+          <div class="exp-period">Oct 2021 – Aug 2022</div>
+          <div class="exp-desc">Forecasted MOQs from historical data for inventory optimization. Implemented SAP scheduling and MRP planning, and provided IT support for cross-functional supply chain operations.</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="container" style="max-width:1100px; width:100%;">
+      <div class="reveal" style="text-align:center;">
+        <p class="section-label">// 04 — Built</p>
+        <h2 class="section-title">FEATURED <span>PROJECTS</span></h2>
+      </div>
+      <div class="projects-grid">
+
+        <div class="glass-card project-card reveal">
+          <span class="project-num">01</span>
+          <p class="project-title">ALL TERRAIN ROVER</p>
+          <p style="font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--neon-cyan); letter-spacing:0.2em; margin-bottom:0.6rem;">WORLDSKILLS · ROBOTICS</p>
+          <p class="project-desc">Rugged multi-surface rover with autonomous navigation and remote-control features, developed for WorldSkills competition.</p>
+          <a href="https://youtu.be/TWGzRgQs5IE?t=114" target="_blank" class="project-link">View Demo →</a>
+        </div>
+
+        <div class="glass-card project-card reveal" style="transition-delay:0.1s;">
+          <span class="project-num">02</span>
+          <p class="project-title">VBAZAAR</p>
+          <p style="font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--neon-cyan); letter-spacing:0.2em; margin-bottom:0.6rem;">REACT · FIREBASE · SPA</p>
+          <p class="project-desc">Full-featured ReactJS grocery delivery application with real-time database integration, built for a commercial client.</p>
+          <a href="https://vbazaar.web.app/" target="_blank" class="project-link">Live App →</a>
+        </div>
+
+        <div class="glass-card project-card reveal" style="transition-delay:0.2s;">
+          <span class="project-num">03</span>
+          <p class="project-title">RECIPE APP</p>
+          <p style="font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--neon-cyan); letter-spacing:0.2em; margin-bottom:0.6rem;">REACT · SPA · CONSULTING</p>
+          <p class="project-desc">Single-page ReactJS application developed for a consulting company, showcasing dynamic UI and clean user experience.</p>
+          <a href="https://recipeapp1.web.app" target="_blank" class="project-link">Live App →</a>
+        </div>
+
+        <div class="glass-card project-card reveal" style="transition-delay:0.3s;">
+          <span class="project-num">04</span>
+          <p class="project-title">EARTHQUAKE ALERT</p>
+          <p style="font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--neon-cyan); letter-spacing:0.2em; margin-bottom:0.6rem;">ESPRESSIF · IoT · ADXL</p>
+          <p class="project-desc">B.Tech project — ADXL-based seismic detection system with smartphone alerts using Espressif microcontroller.</p>
+          <a href="https://earthquakeproject.web.app" target="_blank" class="project-link">View Project →</a>
+        </div>
+
+        <div class="glass-card project-card reveal" style="transition-delay:0.4s;">
+          <span class="project-num">05</span>
+          <p class="project-title">HOME AUTOMATION</p>
+          <p style="font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--neon-cyan); letter-spacing:0.2em; margin-bottom:0.6rem;">PLC · ARDUINO · DIPLOMA</p>
+          <p class="project-desc">PLC & Arduino-based automation system controlling electrical appliances remotely via a mobile app and web interface.</p>
+        </div>
+
+        <div class="glass-card project-card reveal" style="transition-delay:0.5s;">
+          <span class="project-num">06</span>
+          <p class="project-title">ADAPTIVE POWER SUPPLY</p>
+          <p style="font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--neon-cyan); letter-spacing:0.2em; margin-bottom:0.6rem;">WORLDSKILLS · CIRCUIT DESIGN</p>
+          <p class="project-desc">Variable power supply circuit designed and built for the WorldSkills competition, showcasing precision electronics skills.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- EDUCATION & CERTS -->
+  <section id="education">
+    <div class="container" style="max-width:1100px; width:100%; display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:start;">
+
+      <div class="reveal">
+        <p class="section-label">// 05 — Academic</p>
+        <h2 class="section-title">EDUCA<span>TION</span></h2>
+        <div style="margin-top:2rem;">
+
+          <div class="edu-item glass-card" style="margin-bottom:1rem;">
+            <div class="edu-degree">M.Tech — AI & Machine Learning <span style="font-size:0.7rem; color:var(--neon-cyan); font-family:'Share Tech Mono',monospace;">(Pursuing)</span></div>
+            <div class="edu-school">Lingaya's Vidyapeeth</div>
+            <div class="edu-meta">Expected Aug 2027 · CGPA 8.10/10</div>
+          </div>
+
+          <div class="edu-item glass-card" style="margin-bottom:1rem;">
+            <div class="edu-degree">B.Tech — ECIT</div>
+            <div class="edu-school">Jharkhand University of Technology</div>
+            <div class="edu-meta">Sep 2024 · CGPA 8.60/10</div>
+          </div>
+
+          <div class="edu-item glass-card" style="margin-bottom:1rem;">
+            <div class="edu-degree">UG Diploma — EEE</div>
+            <div class="edu-school">Jharkhand University of Technology</div>
+            <div class="edu-meta">Oct 2021 · 81.56%</div>
+          </div>
+
+          <div class="edu-item glass-card">
+            <div class="edu-degree">Matriculation / Class X</div>
+            <div class="edu-school">Bharat Sevashram Sangha</div>
+            <div class="edu-meta">March 2016 · CGPA 7.6/10</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="reveal" style="transition-delay:0.2s;">
+        <p class="section-label">// 06 — Credentials</p>
+        <h2 class="section-title">CERTIFI<span>CATIONS</span></h2>
+        <div style="margin-top:2rem;">
+          <div class="glass-card">
+            <p class="skill-category" style="margin-bottom:1rem;">Verified Certifications</p>
+            <div>
+              <span class="cert-badge">CyberSecurity Bootcamp</span>
+              <span class="cert-badge">Network Security</span>
+              <span class="cert-badge">Defensive Cyber Ops</span>
+              <span class="cert-badge">Tableau</span>
+              <span class="cert-badge">Advanced Excel</span>
+              <span class="cert-badge">SAP MM</span>
+              <span class="cert-badge">React</span>
+              <span class="cert-badge">Linux</span>
+              <span class="cert-badge">IoT</span>
+            </div>
+          </div>
+
+          <div class="glass-card" style="margin-top:1.2rem; border-color:rgba(0,255,204,0.2);">
+            <p class="skill-category">WorldSkills Mentor</p>
+            <p style="font-size:0.9rem; color:var(--text-dim); line-height:1.6;">
+              Certified WorldSkills Mentor by <span style="color:var(--neon-cyan);">Autodesk</span>. Competed and mentored in international-standard robotics and electronics challenges.
+            </p>
+          </div>
+
+          <div class="glass-card" style="margin-top:1.2rem;">
+            <p class="skill-category">Portfolio & Links</p>
+            <div style="display:flex; flex-direction:column; gap:0.5rem;">
+              <a href="https://vivekkum-ar.github.io" target="_blank" style="color:var(--neon-blue); font-family:'Share Tech Mono',monospace; font-size:0.72rem; letter-spacing:0.1em; text-decoration:none;">🌐 vivekkum-ar.github.io</a>
+              <a href="mailto:vivekkr9119@gmail.com" style="color:var(--neon-blue); font-family:'Share Tech Mono',monospace; font-size:0.72rem; letter-spacing:0.1em; text-decoration:none;">✉ vivekkr9119@gmail.com</a>
+              <span style="color:var(--text-dim); font-family:'Share Tech Mono',monospace; font-size:0.72rem; letter-spacing:0.1em;">📞 7808101051</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="reveal" style="text-align:center; max-width:700px;">
+      <p class="section-label">// 07 — Connect</p>
+      <h2 class="section-title" style="font-size:clamp(2.5rem,8vw,5rem);">LET'S BUILD <span>TOGETHER</span></h2>
+      <p style="color:var(--text-dim); font-size:1.05rem; line-height:1.7; margin-top:1rem;">
+        Open to training collaborations, full-stack development projects, AI/ML consulting, and WorldSkills mentorship opportunities.
+      </p>
+      <div class="contact-links">
+        <a href="mailto:vivekkr9119@gmail.com" class="btn-primary">Send Email</a>
+        <a href="https://vivekkum-ar.github.io" target="_blank" class="btn-outline">View Portfolio</a>
+      </div>
+      <p style="margin-top:2.5rem; font-family:'Share Tech Mono',monospace; font-size:0.72rem; color:var(--text-dim); letter-spacing:0.2em;">
+        📍 JSR, Jharkhand – 831011 · India
+      </p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 Vivek Kumar · Designed with Three.js · JSR, Jharkhand</p>
+  </footer>
+
+</div>
+
+<script>
+// ============================================
+// CURSOR
+// ============================================
+const cursor = document.getElementById('cursor');
+const trail = document.getElementById('cursorTrail');
+let mx = -100, my = -100;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx - 5 + 'px';
+  cursor.style.top = my - 5 + 'px';
+  setTimeout(() => {
+    trail.style.left = mx - 15 + 'px';
+    trail.style.top = my - 15 + 'px';
+  }, 80);
+});
+
+// ============================================
+// THREE.JS SCENE
+// ============================================
+const canvas = document.getElementById('three-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.set(0, 0, 5);
+
+// ---- LIGHTS ----
+const ambientLight = new THREE.AmbientLight(0x0a0020, 0.5);
+scene.add(ambientLight);
+
+// Neon blue directional
+const dirLight = new THREE.DirectionalLight(0x00d4ff, 3.5);
+dirLight.position.set(5, 5, 5);
+scene.add(dirLight);
+
+// Deep purple point
+const purpleLight = new THREE.PointLight(0x7b2fff, 4, 15);
+purpleLight.position.set(-4, -2, 2);
+scene.add(purpleLight);
+
+// Rim light
+const rimLight = new THREE.DirectionalLight(0x00ffcc, 1.2);
+rimLight.position.set(-3, 0, -3);
+scene.add(rimLight);
+
+// ---- MAIN GEOMETRIC OBJECT (Icosahedron + WireFrame overlay) ----
+const geoIco = new THREE.IcosahedronGeometry(1.5, 1);
+
+// Glassmorphic material
+const matGlass = new THREE.MeshPhysicalMaterial({
+  color: 0x0a1a3a,
+  metalness: 0.1,
+  roughness: 0.05,
+  transmission: 0.85,
+  thickness: 1.5,
+  transparent: true,
+  opacity: 0.75,
+  reflectivity: 0.9,
+  envMapIntensity: 1.0,
+});
+
+const mainMesh = new THREE.Mesh(geoIco, matGlass);
+scene.add(mainMesh);
+
+// Wireframe overlay
+const wireGeo = new THREE.IcosahedronGeometry(1.52, 1);
+const wireMat = new THREE.MeshBasicMaterial({
+  color: 0x00d4ff,
+  wireframe: true,
+  transparent: true,
+  opacity: 0.25,
+});
+const wireMesh = new THREE.Mesh(wireGeo, wireMat);
+scene.add(wireMesh);
+
+// ---- INNER SPINNING OCTAHEDRON ----
+const innerGeo = new THREE.OctahedronGeometry(0.7, 0);
+const innerMat = new THREE.MeshPhysicalMaterial({
+  color: 0x7b2fff,
+  metalness: 0.8,
+  roughness: 0.1,
+  emissive: 0x3a0090,
+  emissiveIntensity: 0.5,
+});
+const innerMesh = new THREE.Mesh(innerGeo, innerMat);
+scene.add(innerMesh);
+
+// ---- FLOATING PARTICLES ----
+const particleCount = 300;
+const particleGeo = new THREE.BufferGeometry();
+const positions = new Float32Array(particleCount * 3);
+const colors = new Float32Array(particleCount * 3);
+
+for (let i = 0; i < particleCount; i++) {
+  positions[i * 3]     = (Math.random() - 0.5) * 30;
+  positions[i * 3 + 1] = (Math.random() - 0.5) * 30;
+  positions[i * 3 + 2] = (Math.random() - 0.5) * 30;
+
+  const t = Math.random();
+  colors[i * 3]     = t < 0.5 ? 0 : 0.48;
+  colors[i * 3 + 1] = t < 0.5 ? 0.83 : 0.18;
+  colors[i * 3 + 2] = t < 0.5 ? 1.0 : 1.0;
+}
+
+particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+const particleMat = new THREE.PointsMaterial({
+  size: 0.05,
+  vertexColors: true,
+  transparent: true,
+  opacity: 0.7,
+  sizeAttenuation: true,
+});
+const particles = new THREE.Points(particleGeo, particleMat);
+scene.add(particles);
+
+// ---- TORUS RING ----
+const ringGeo = new THREE.TorusGeometry(2.2, 0.02, 8, 80);
+const ringMat = new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.3 });
+const ring1 = new THREE.Mesh(ringGeo, ringMat);
+ring1.rotation.x = Math.PI / 2;
+scene.add(ring1);
+
+const ringGeo2 = new THREE.TorusGeometry(2.6, 0.015, 8, 80);
+const ringMat2 = new THREE.MeshBasicMaterial({ color: 0x7b2fff, transparent: true, opacity: 0.2 });
+const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
+ring2.rotation.x = Math.PI / 4;
+ring2.rotation.z = Math.PI / 6;
+scene.add(ring2);
+
+// ---- FLOATING CAMERA ANIMATION ----
+let scrollY = window.scrollY;
+let targetCamZ = 5;
+let targetCamX = 0;
+let targetCamY = 0;
+const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+
+window.addEventListener('scroll', () => {
+  scrollY = window.scrollY;
+  const progress = scrollY / totalHeight;
+  targetCamZ = 5 + progress * 8;
+  targetCamX = Math.sin(progress * Math.PI * 2) * 2;
+  targetCamY = Math.cos(progress * Math.PI) * 1.5;
+});
+
+// Mouse parallax
+let mouseX = 0, mouseY = 0;
+document.addEventListener('mousemove', e => {
+  mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+  mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+});
+
+// ---- RESIZE ----
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
+
+// ---- ANIMATE ----
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const elapsed = clock.getElapsedTime();
+
+  // Rotate objects
+  mainMesh.rotation.x = elapsed * 0.12;
+  mainMesh.rotation.y = elapsed * 0.18;
+  wireMesh.rotation.x = elapsed * 0.12;
+  wireMesh.rotation.y = elapsed * 0.18;
+
+  innerMesh.rotation.x = -elapsed * 0.3;
+  innerMesh.rotation.y = elapsed * 0.4;
+
+  ring1.rotation.z = elapsed * 0.08;
+  ring2.rotation.y = elapsed * 0.06;
+
+  particles.rotation.y = elapsed * 0.02;
+  particles.rotation.x = elapsed * 0.01;
+
+  // Float animation
+  const floatY = Math.sin(elapsed * 0.6) * 0.15;
+  mainMesh.position.y = floatY;
+  wireMesh.position.y = floatY;
+  innerMesh.position.y = floatY;
+
+  // Light pulse
+  purpleLight.intensity = 3 + Math.sin(elapsed * 1.5) * 1;
+  dirLight.intensity = 3 + Math.cos(elapsed * 0.8) * 0.5;
+
+  // Smooth camera
+  camera.position.z += (targetCamZ - camera.position.z) * 0.05;
+  camera.position.x += (targetCamX + mouseX * 1.5 - camera.position.x) * 0.04;
+  camera.position.y += (targetCamY - mouseY * 1 - camera.position.y) * 0.04;
+  camera.lookAt(0, 0, 0);
+
+  renderer.render(scene, camera);
+}
+animate();
+
+// ============================================
+// SCROLL REVEAL
+// ============================================
+const revealEls = document.querySelectorAll('.reveal');
+const expItems = document.querySelectorAll('.exp-item');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+revealEls.forEach(el => observer.observe(el));
+expItems.forEach(el => observer.observe(el));
+</script>
+</body>
 </html>
